@@ -34,3 +34,20 @@ func Register(c *gin.Context) {
 		"data": userData,
 	})
 }
+
+func Login(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "login",
+	})
+}
+
+func SearchByName(c *gin.Context) {
+	fullname := c.Query("fullname")
+
+	c.JSON(200, gin.H{
+		"message": "search by name",
+		"data": map[string]interface{}{
+			"name": fullname,
+		},
+	})
+}
