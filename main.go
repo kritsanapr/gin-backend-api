@@ -6,10 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/kritsanapr/gin-backend-api/configs"
 	"github.com/kritsanapr/gin-backend-api/routes"
 )
 
 func main() {
+	configs.ConnectionDB()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
