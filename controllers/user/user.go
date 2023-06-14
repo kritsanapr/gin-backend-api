@@ -1,6 +1,12 @@
 package usercontroller
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/kritsanapr/gin-backend-api/configs"
+	"github.com/kritsanapr/gin-backend-api/models"
+)
 
 func GetAll(c *gin.Context) {
 	c.JSON(200, gin.H{
@@ -19,25 +25,40 @@ func GetById(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	// Get value from form-date
-	// userData := map[string]interface{}{
-	// 	"fullname": c.PostForm("fullname"),
-	// 	"email":    c.PostForm("email"),
-	// 	"password": c.PostForm("password"),
-	// }
+	var json InputRegister
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	// Get value from json body
-	var userData map[string]interface{}
-	c.BindJSON(&userData)
+	user := models.User{
+		Fullname: json.Fullname,
+		Email:    json.Email,
+		Password: json.Password,
+	}
+
+	result := configs.DB.Create(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "error",
+			"data":    result.Error,
+		})
+		return
+	}
 
 	c.JSON(200, gin.H{
-		"data": userData,
+		"data": "สมัครสมาชิกเรียบร้อยแล้ว",
 	})
 }
 
 func Login(c *gin.Context) {
+	var json InputLogin
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
 	c.JSON(200, gin.H{
-		"message": "login",
+		"message": json,
 	})
 }
 
