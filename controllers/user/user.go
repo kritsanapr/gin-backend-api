@@ -37,7 +37,7 @@ func Register(c *gin.Context) {
 		Password: json.Password,
 	}
 
-	result := configs.DB.Create(&user)
+	result := configs.DB.Debug().Create(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "error",
