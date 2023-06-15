@@ -10,3 +10,9 @@ type InputLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type Users struct {
+	Fullname string
+	Email    string
+	Password string
+}

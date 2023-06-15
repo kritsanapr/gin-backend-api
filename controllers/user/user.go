@@ -9,18 +9,29 @@ import (
 )
 
 func GetAll(c *gin.Context) {
+	var users []models.User
+	configs.DB.Find(&users)
+
 	c.JSON(200, gin.H{
-		"message": "user api v1",
+		"data": users,
 	})
 }
 
 func GetById(c *gin.Context) {
 	id := c.Param("id")
+
+	var user models.User
+	result := configs.DB.First(&user, id)
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "ไม่พบข้อมูล",
+		})
+		return
+	}
+
 	c.JSON(200, gin.H{
-		"message": "get user by id",
-		"data": map[string]interface{}{
-			"id": id,
-		},
+		"data": user,
 	})
 }
 
@@ -35,6 +46,14 @@ func Register(c *gin.Context) {
 		Fullname: json.Fullname,
 		Email:    json.Email,
 		Password: json.Password,
+	}
+
+	userExists := configs.DB.Where("email = ?", user.Email).First(&models.User{})
+	if userExists.RowsAffected > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"data": "อีเมล์นี้มีผู้ใช้งานแล้ว",
+		})
+		return
 	}
 
 	result := configs.DB.Debug().Create(&user)
@@ -65,10 +84,16 @@ func Login(c *gin.Context) {
 func SearchByName(c *gin.Context) {
 	fullname := c.Query("fullname")
 
+	users := []models.User{}
+	result := configs.DB.Where("fullname LIKE ?", "%"+fullname+"%").Find(&users)
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "ไม่พบข้อมูล",
+		})
+		return
+	}
+
 	c.JSON(200, gin.H{
-		"message": "search by name",
-		"data": map[string]interface{}{
-			"name": fullname,
-		},
+		"data": users,
 	})
 }

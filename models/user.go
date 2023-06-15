@@ -8,13 +8,13 @@ import (
 )
 
 type User struct {
-	ID        uint   `gorm:"primary_key" json:"id"`
-	Fullname  string `gorm:"type:varchar(255); not null"`
-	Email     string `gorm:"type:varchar(255); not null; unique"`
-	Password  string `gorm:"type:varchar(255); not null"`
-	IsAdmin   bool   `gorm:"type:bool; default:false"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint      `json:"id" gorm:"primary_key"`
+	Fullname  string    `json:"fullname" gorm:"type:varchar(255); not null"`
+	Email     string    `json:"email" gorm:"type:varchar(255); not null; unique"`
+	Password  string    `json:"-" gorm:"type:varchar(255); not null"`
+	IsAdmin   bool      `json:"is_admin" gorm:"type:bool; default:false"`
+	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp; not null; default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp; not null; default:CURRENT_TIMESTAMP"`
 }
 
 func (user *User) BeforeCreate(db *gorm.DB) error {
@@ -26,4 +26,9 @@ func hashPassword(password string) string {
 	argon := argon2.DefaultConfig()
 	encoded, _ := argon.HashEncoded([]byte(password))
 	return string(encoded)
+}
+
+func (user *User) AfterFind(db *gorm.DB) error {
+	user.Password = ""
+	return nil
 }
