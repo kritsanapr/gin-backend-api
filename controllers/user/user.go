@@ -3,8 +3,11 @@ package usercontroller
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/kritsanapr/gin-backend-api/configs"
 	"github.com/kritsanapr/gin-backend-api/models"
 	"github.com/kritsanapr/gin-backend-api/utils"
@@ -108,8 +111,27 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// Create token from jwt
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"email":   user.Email,
+		"exp":     time.Now().Add(time.Hour).Unix(),
+	})
+
+	secert := os.Getenv("JWT_SECRET")
+	accessToken, _ := token.SignedString([]byte(secert))
+
+	fmt.Println("Token : ", accessToken)
+
 	c.JSON(200, gin.H{
 		"message": "เข้าสู่ระบบสำเร็จ",
+		"token":   accessToken,
+		"data": []map[string]interface{}{
+			{
+				"fullname": user.Fullname,
+				"email":    user.Email,
+			},
+		},
 	})
 
 }
@@ -128,5 +150,13 @@ func SearchByName(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"data": users,
+	})
+}
+
+func GetProfile(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
+
+	c.JSON(200, gin.H{
+		"data": user,
 	})
 }

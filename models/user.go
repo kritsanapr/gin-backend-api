@@ -27,8 +27,3 @@ func hashPassword(password string) string {
 	encoded, _ := argon.HashEncoded([]byte(password))
 	return string(encoded)
 }
-
-func (user *User) AfterFind(db *gorm.DB) error {
-	user.Password = ""
-	return nil
-}

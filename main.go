@@ -12,26 +12,28 @@ import (
 
 func main() {
 	configs.ConnectionDB()
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	router := SetupRouter()
-
 	router.Run(":" + os.Getenv("PORT"))
 }
 
 func SetupRouter() *gin.Engine {
-	router := gin.Default()
+	//  Load environment variables
+	godotenv.Load(".env")
 
+	// Set the router as the default one provided by Gin
+	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"API VERSION": "1.0.0",
 		})
 	})
 
+	// Setup route group for the API
 	apiV1 := router.Group("/api/v1")
 	routes.InitHomeRoutes(apiV1)
 	routes.InitProductRoutes(apiV1)
