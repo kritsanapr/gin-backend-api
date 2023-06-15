@@ -1,12 +1,14 @@
 package usercontroller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kritsanapr/gin-backend-api/configs"
 	"github.com/kritsanapr/gin-backend-api/models"
 	"github.com/kritsanapr/gin-backend-api/utils"
+	"github.com/matthewhartstonge/argon2"
 )
 
 func GetAll(c *gin.Context) {
@@ -72,14 +74,44 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	var json InputLogin
-	if err := c.ShouldBindJSON(&json); err != nil {
+	var input InputLogin
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := models.User{
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	userAccount := configs.DB.Where("email = ?", input.Email).First(&user)
+	if userAccount.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "ไม่พบข้อมูลผู้ใช้งาน",
+		})
+		return
+	}
+
+	fmt.Println("Email : ", user.Email)
+	fmt.Println("Password : ", user.Password)
+	ok, err := argon2.VerifyEncoded([]byte(input.Password), []byte(user.Password))
+	if err != nil {
+		fmt.Println("Error verifying password")
+		fmt.Println(err)
+	}
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "รหัสผ่านไม่ถูกต้อง",
+		})
+		return
 	}
 
 	c.JSON(200, gin.H{
-		"message": json,
+		"message": "เข้าสู่ระบบสำเร็จ",
 	})
+
 }
 
 func SearchByName(c *gin.Context) {
