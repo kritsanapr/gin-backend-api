@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kritsanapr/gin-backend-api/configs"
 	"github.com/kritsanapr/gin-backend-api/models"
+	"github.com/kritsanapr/gin-backend-api/utils"
 )
 
 func GetAll(c *gin.Context) {
@@ -85,7 +86,7 @@ func SearchByName(c *gin.Context) {
 	fullname := c.Query("fullname")
 
 	users := []models.User{}
-	result := configs.DB.Where("fullname LIKE ?", "%"+fullname+"%").Find(&users)
+	result := configs.DB.Where("fullname LIKE ?", "%"+fullname+"%").Scopes(utils.Paginate(c)).Find(&users)
 	if result.RowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "ไม่พบข้อมูล",
