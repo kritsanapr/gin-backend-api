@@ -16,7 +16,8 @@ import (
 
 func GetAll(c *gin.Context) {
 	var users []models.User
-	configs.DB.Find(&users)
+	// configs.DB.Find(&users)
+	configs.DB.Preload("Blogs").First(&users)
 
 	c.JSON(200, gin.H{
 		"data": users,
@@ -156,7 +157,7 @@ func SearchByName(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"data": user,
 	})
 }

@@ -26,7 +26,7 @@ func ConnectionDB() {
 	}
 
 	// Migration
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Blog{})
 
 	fmt.Println("เชื่อมต่อฐานข้อมูลสำเร็จ")
 	DB = db
